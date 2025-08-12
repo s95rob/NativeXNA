@@ -29,7 +29,7 @@ namespace NativeXNA {
 
         using EventHandlerFn = std::function<void(const TEventArgs&)>;
 
-        Event() = default;
+        EventHandler() = default;
 
         void Invoke(const TEventArgs& args = EventArgs()) {
             for (auto& handler : m_Handlers) {
