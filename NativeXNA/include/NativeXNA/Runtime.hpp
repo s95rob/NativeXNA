@@ -6,6 +6,7 @@
 #include <functional>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 namespace NativeXNA {
 
@@ -19,17 +20,20 @@ namespace NativeXNA {
         virtual void Dispose() = 0;
     };
 
+    struct EventArgs {};
     
-    template <typename ... TEventArgs>
-    class NATIVEXNA_API Event {
+    template <typename TEventArgs>
+    class NATIVEXNA_API EventHandler {
     public:
-        using EventHandlerFn = std::function<void(TEventArgs ...)>;
+        static_assert(std::is_base_of_v<EventArgs, TEventArgs>, "TEventArgs must be derived from EventArgs");
+
+        using EventHandlerFn = std::function<void(const TEventArgs&)>;
 
         Event() = default;
 
-        void Invoke(TEventArgs&& ... args) {
+        void Invoke(const TEventArgs& args = EventArgs()) {
             for (auto& handler : m_Handlers) {
-                handler(std::forward<TEventArgs>(args) ...);
+                handler(args);
             }
         }
 

@@ -5,7 +5,7 @@ namespace NativeXNA {
 
     void Game::Run() {
         Window = MakeRef<GameWindow>("Game", 1280, 720);
-        Window->Closed += [&]() { m_IsRunning = false; };
+        Window->Closed += [&](const EventArgs&) { m_IsRunning = false; };
 
         while(m_IsRunning) {
             Platform::ProcessWindowMessages(Window->GetHandle());

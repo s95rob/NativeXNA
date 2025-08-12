@@ -15,7 +15,7 @@ namespace NativeXNA {
         ~GameWindow();
 
         // Sets the title of the system window
-        void SetTitle(std::string_view pszTitle);
+        void SetTitle(std::string_view title);
 
         std::string GetTitle() const;
 
@@ -25,10 +25,10 @@ namespace NativeXNA {
         IntPtr GetHandle() const { return m_Handle; }
 
         // Raised when the GameWindow is about to close.
-        Event<> Closed;
+        EventHandler<EventArgs> Closed;
 
         // Raised when the size of the GameWindow changes.
-        Event<> ClientSizeChanged;
+        EventHandler<EventArgs> ClientSizeChanged;
 
     private:
         IntPtr m_Handle;
