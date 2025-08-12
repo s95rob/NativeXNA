@@ -11,7 +11,7 @@
 namespace NativeXNA {
 
     using IntPtr = size_t;
-
+    
 
     class IDisposable {
     public:

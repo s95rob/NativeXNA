@@ -1,11 +1,17 @@
 #include "NativeXNA/Game.hpp"
 #include "NativeXNA/Platform.hpp"
+#include "NativeXNA/Graphics.hpp"
 
 namespace NativeXNA {
 
-    void Game::Run() {
+    Game::Game() {
         Window = MakeRef<GameWindow>("Game", 1280, 720);
         Window->Closed += [&](const EventArgs&) { m_IsRunning = false; };
+    }
+
+    void Game::Run() {
+        Initialize();
+        LoadContent();
 
         while(m_IsRunning) {
             Platform::ProcessWindowMessages(Window->GetHandle());
@@ -17,7 +23,22 @@ namespace NativeXNA {
         // TODO: fill out gameTime struct
         GameTime gameTime = {};
         Update(gameTime);
+
+        BeginDraw();
         Draw(gameTime);
+        EndDraw();
+    }
+
+    void Game::BeginDraw() {
+        auto* graphicsDeviceManager = Services.GetService<GraphicsDeviceManager>();
+        if (graphicsDeviceManager)
+            graphicsDeviceManager->BeginDraw();
+    }
+
+    void Game::EndDraw() {
+        auto* graphicsDeviceManager = Services.GetService<GraphicsDeviceManager>();
+        if (graphicsDeviceManager)
+            graphicsDeviceManager->EndDraw();
     }
 
 }

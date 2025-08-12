@@ -1,12 +1,7 @@
 #pragma once
 
 #include "NativeXNA/Game.hpp"
-
-#ifndef WIN32_LEAN_AND_MEAN
-    #define WIN32_LEAN_AND_MEAN 1
-#endif
-
-#include <Windows.h>
+#include "Win32Include.hpp"
 
 namespace NativeXNA {
 

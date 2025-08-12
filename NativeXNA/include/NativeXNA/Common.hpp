@@ -2,6 +2,10 @@
 
 #include <utility>
 #include <cstdlib>
+#include <memory>
+#include <cassert>
+
+#define NATIVEXNA_ASSERT(expression) assert(expression)
 
 #ifdef NATIVEXNA_PLATFORM_WIN32
     #define NATIVEXNA_API __declspec(dllexport)
@@ -103,5 +107,23 @@ namespace NativeXNA {
             throw;
         }
     }
+
+    template <typename T>
+    struct PlatformData {};
+    
+    template <typename T>
+    class PlatformImplementation {
+    public:
+        virtual ~PlatformImplementation() = default;
+
+        const PlatformData<T>& GetPlatformData() const { return *m_PlatformData; }
+
+    protected:
+        PlatformImplementation()
+            : m_PlatformData(std::make_unique<PlatformData<T>>()) {}
+
+    protected:
+        std::unique_ptr<PlatformData<T>> m_PlatformData;        
+    };
 
 }
