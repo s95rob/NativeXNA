@@ -5,8 +5,7 @@
 namespace NativeXNA {
 
     Game::Game() {
-        Window = MakeRef<GameWindow>("Game", 1280, 720);
-        Window->Closed += [&](const EventArgs&) { m_IsRunning = false; };
+        Window = MakeRef<GameWindow>(this, "Game", 1280, 720);
     }
 
     void Game::Run() {
@@ -17,6 +16,11 @@ namespace NativeXNA {
             Platform::ProcessWindowMessages(Window->GetHandle());
             Tick();
         }
+    }
+
+    void Game::Exit() {
+        Exiting.Invoke();
+        m_IsRunning = false;
     }
 
     void Game::Tick() {

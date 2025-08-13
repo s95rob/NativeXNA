@@ -2,7 +2,8 @@
 
 namespace NativeXNA {
 
-    Win32GameWindow::GameWindow(std::string_view title, int width, int height) {
+    Win32GameWindow::GameWindow(Game* pGame, std::string_view title, int width, int height) 
+        : GameChild(pGame) {
         static bool isWindowClassRegistered = false;
 
         WNDCLASS wc = {};
@@ -53,9 +54,16 @@ namespace NativeXNA {
         switch (uMsg) {
         case WM_CLOSE:
             gameWindow->Closed.Invoke();
+            gameWindow->GetGame()->Exit();
             return 0;
         case WM_SIZE:
             gameWindow->ClientSizeChanged.Invoke();
+            return 0;
+        case WM_ACTIVATE:
+            if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE)
+                gameWindow->GetGame()->Activated.Invoke();
+            else
+                gameWindow->GetGame()->Deactivated.Invoke();
             return 0;
         }
 

@@ -8,7 +8,7 @@ namespace NativeXNA {
     using D3D11GraphicsDevice = GraphicsDevice;
 
     template <>
-    struct PlatformData<D3D11GraphicsDevice> {
+    struct NATIVEXNA_API PlatformData<D3D11GraphicsDevice> {
         ID3D11Device* pDevice;
         ID3D11DeviceContext* pContext;
         IDXGISwapChain* pSwapchain;

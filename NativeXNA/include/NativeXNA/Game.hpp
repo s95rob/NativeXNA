@@ -8,13 +8,30 @@
 
 namespace NativeXNA {
 
+    class Game;
+
+    class GameChild {
+    public:
+        virtual ~GameChild() = default;
+
+        Game* GetGame() { return m_pGame; }
+        const Game* GetGame() const { return m_pGame; }
+
+    protected:
+        GameChild(Game* pGame)
+            : m_pGame(pGame) {}
+
+    protected:
+        Game* m_pGame;
+    };
+
     struct GameTime {
         float ElapsedTime;
     };
 
-    class NATIVEXNA_API GameWindow {
+    class NATIVEXNA_API GameWindow : public GameChild {
     public:
-        GameWindow(std::string_view title, int width, int height);
+        GameWindow(Game* pGame, std::string_view title, int width, int height);
         ~GameWindow();
 
         // Sets the title of the system window
@@ -60,11 +77,20 @@ namespace NativeXNA {
         virtual ~Game() = default;
 
         void Run();
-        void Exit() { m_IsRunning = false; }
+        void Exit();
         void Tick();
 
         GameServiceContainer Services;
         Ref<GameWindow> Window;
+
+        // Raised when the game gains focus.
+        EventHandler<EventArgs> Activated;
+
+        // Raised when the game loses focus. 
+        EventHandler<EventArgs> Deactivated;
+
+        // Rasied when the game is exiting.
+        EventHandler<EventArgs> Exiting;
 
     protected:
         virtual void Initialize() {}
