@@ -16,7 +16,22 @@
 namespace NativeXNA {
 
     template <typename T>
-    class Ref {
+    class NATIVEXNA_API Ref {
+    private:
+        // Single allocation for the Ref's control block
+        struct RefAllocation {
+            size_t RefCount = 1;
+            alignas(alignof(T)) uint8_t ObjectMemory[sizeof(T)] = {};
+
+            T* GetObject() {
+				return reinterpret_cast<T*>(ObjectMemory);
+            }
+
+            const T* GetObject() const {
+                return reinterpret_cast<const T*>(ObjectMemory);
+            }
+        };
+
     public:
         template <typename U, typename ... TArgs>
         friend Ref<U> MakeRef(TArgs&& ...);
@@ -24,95 +39,70 @@ namespace NativeXNA {
         Ref() = default;
 
         Ref(const Ref& other)
-            : m_pRef(other.m_pRef), m_pRefCount(other.m_pRefCount) {
-            if (m_pRef)
-                ++(*m_pRefCount);
+            : m_pAllocation(other.m_pAllocation) {
+            if (m_pAllocation)
+                ++(m_pAllocation->RefCount);
         }
 
         Ref(Ref&& other) noexcept 
-            : m_pRef(other.m_pRef), m_pRefCount(other.m_pRefCount) {
-            other.m_pRef = nullptr;
-            other.m_pRefCount = nullptr;
+			: m_pAllocation(other.m_pAllocation) {
+			other.m_pAllocation = nullptr;
         }
 
         ~Ref() {
-            if (m_pRefCount) {
-                if (--(*m_pRefCount) == 0) {
-                    delete m_pRef;
-                    delete m_pRefCount;
-                }
-            }
+			if (m_pAllocation) {
+				if (--(m_pAllocation->RefCount) == 0) {
+					m_pAllocation->GetObject()->~T();
+					delete m_pAllocation;
+				}
+			}
         }
 
-        Ref& operator=(const Ref& other) {
-            if (this != &other) {
-                Ref temp(other);
-                std::swap(m_pRef, temp.m_pRef);
-                std::swap(m_pRefCount, temp.m_pRefCount);
-            }
-
+        Ref& operator=(Ref other) {
+			std::swap(m_pAllocation, other.m_pAllocation);
             return *this;
         }
 
-        Ref& operator=(Ref&& other) noexcept {
-            if (this != &other) {
-                if (m_pRef && --(*m_pRefCount) == 0) {
-                    delete m_pRef;
-                    delete m_pRefCount;
-                }
+        T* operator->() { return m_pAllocation->GetObject(); }
+        const T* operator->() const { return m_pAllocation->GetObject(); }
 
-                m_pRef = other.m_pRef;
-                m_pRefCount = other.m_pRefCount;
-                other.m_pRef = nullptr;
-                other.m_pRefCount = nullptr;
-            }
+        operator T&() { return *m_pAllocation->GetObject(); }
+        operator const T&() const { return *m_pAllocation->GetObject(); }
 
-            return *this;
-        }
-
-        T* operator->() { return m_pRef; }
-        const T* operator->() const { return m_pRef; }
-
-        operator T&() { return *m_pRef; }
-        operator const T&() const { return *m_pRef; }
-
-        bool operator==(const Ref<T>& other) const { return (m_pRef == other.m_pRef); }
-        operator bool() const { return (m_pRef != nullptr); }
+        bool operator==(const Ref<T>& other) const { return (m_pAllocation == other.m_pAllocation); }
+        operator bool() const { return (m_pAllocation != nullptr); }
 
     private:
-        Ref(T* pRef, size_t* pRefCount)
-            : m_pRef(pRef), m_pRefCount(pRefCount) {}
+        Ref(RefAllocation* pAlloc)
+            : m_pAllocation(pAlloc) {}
+
 
     private:
-        T* m_pRef = nullptr;
-        size_t* m_pRefCount = nullptr;
+		RefAllocation* m_pAllocation = nullptr;
     };
 
     template <typename T, typename ... TArgs>
-    inline Ref<T> MakeRef(TArgs&& ... args) {
-        // Single allocation for the Ref's control block
-        struct RefAllocation {
-            size_t RefCount = 1;
-            alignas(alignof(T)) uint8_t ObjectMemory[sizeof(T)];
-        };
-
-        RefAllocation* block = static_cast<RefAllocation*>(::operator new(sizeof(RefAllocation)));
+    inline NATIVEXNA_API Ref<T> MakeRef(TArgs&& ... args) {
+		// Allocate memory for the Ref's control block
+		auto block = new typename Ref<T>::RefAllocation();
 
         // Exception-safe allocation
         try {
-            T* objectPtr = new (block->ObjectMemory) T(std::forward<TArgs>(args) ...);
-            return Ref<T>(objectPtr, &block->RefCount);
+			new (block->ObjectMemory) T(std::forward<TArgs>(args)...);
         } catch (...) {
-            ::operator delete(block);
+            delete block;
+            block = nullptr;
             throw;
         }
+
+        return Ref<T>(block);
     }
 
     template <typename T>
-    struct PlatformData {};
+    struct NATIVEXNA_API PlatformData {};
     
     template <typename T>
-    class PlatformImplementation {
+    class NATIVEXNA_API PlatformImplementation {
     public:
         virtual ~PlatformImplementation() = default;
 
