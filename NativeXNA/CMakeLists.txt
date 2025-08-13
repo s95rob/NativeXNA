@@ -1,4 +1,4 @@
-file(GLOB_RECURSE NATIVEXNA_SRCS "src/*")
+file(GLOB_RECURSE NATIVEXNA_SRCS "src/*" "include/*")
 add_library(NativeXNA SHARED ${NATIVEXNA_SRCS})
 target_include_directories(NativeXNA
 PUBLIC
