@@ -12,6 +12,9 @@ namespace NativeXNA {
         ID3D11Device* pDevice;
         ID3D11DeviceContext* pContext;
         IDXGISwapChain* pSwapchain;
+        ID3D11RenderTargetView* pBackbufferView;
     };
+
+	using D3D11GraphicsDeviceManager = GraphicsDeviceManager;
 
 }

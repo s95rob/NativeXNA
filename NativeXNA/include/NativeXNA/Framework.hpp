@@ -2,6 +2,17 @@
 
 namespace NativeXNA {
 
+    struct Color {
+		float R, G, B, A;
+
+		Color()
+			: Color(0.0f, 0.0f, 0.0f, 1.0f) {}
+		Color(float r, float g, float b, float a = 1.0f)
+			: R(r), G(g), B(b), A(a) {}
+		Color(int r, int g, int b, int a = 255)
+			: R(r / 255.0f), G(g / 255.0f), B(b / 255.0f), A(a / 255.0f) {}
+    };
+
     struct Point {
         int X, Y;
 

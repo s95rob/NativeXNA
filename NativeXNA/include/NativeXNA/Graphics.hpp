@@ -1,8 +1,11 @@
 #pragma once
 
 #include "NativeXNA/Runtime.hpp"
+#include "NativeXNA/Framework.hpp"
 
 namespace NativeXNA {
+
+    // GRAPHICS DEVICE
 
     struct PresentationParameters {
         int BackBufferCount;
@@ -12,8 +15,12 @@ namespace NativeXNA {
     class NATIVEXNA_API GraphicsDevice : public PlatformImplementation<GraphicsDevice>, public IDisposable {
     public:
         GraphicsDevice(const PresentationParameters& presentationParameters);
+		virtual ~GraphicsDevice() = default;
 
         virtual void Dispose() override;
+
+        // Clears the viewport to a specified color.
+        void Clear(const Color& color);
     };
 
     class IGraphicsDeviceService {
@@ -37,9 +44,10 @@ namespace NativeXNA {
     class NATIVEXNA_API GraphicsDeviceManager : public IGraphicsDeviceService, public IDisposable, public IGraphicsDeviceManager {
     public:
         GraphicsDeviceManager(Game* pGame);
+		virtual ~GraphicsDeviceManager() = default;
 
         virtual void CreateDevice() override;
-        virtual bool BeginDraw() override { return true; }
+        virtual bool BeginDraw() override;
         virtual void EndDraw() override;
 
         virtual void Dispose() override { m_GraphicsDevice->Dispose(); }

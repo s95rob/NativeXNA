@@ -13,6 +13,10 @@ public:
         graphics->Dispose();
     }
 
+    virtual void Draw(GameTime gameTime) override {
+        graphics->GetGraphicsDevice()->Clear(Color(1.0f, 0.0f, 1.0f, 1.0f));
+    }
+
     Ref<GraphicsDeviceManager> graphics;
 };
 
